@@ -20,15 +20,15 @@ Shape.prototype.contains = function(mouseX, mouseY) {
   return (this.x <= mouseX) && (this.x + this.width >= mouseX) && (this.y <= mouseY) && (this.y + this.height >= mouseY);
 }
 
-function theCanvasFn(theCanvas) {
+function TheCanvas(canvas) {
   //random var declaration
   var paddingLeft, paddingTop, borderLeft, borderTop;
 
   //just in case I want to havemultiple canvases layered on top of eachother
-  this.canvas = theCanvas;
+  this.canvas = canvas;
   this.height = height;
   this.width = width;
-  this.context = theCanvas.getContext("2d");
+  this.context = canvas.getContext("2d");
 
   //need an array for the shapes, In my game I made a function called pools
   //that held arrays of objects
@@ -47,7 +47,7 @@ function theCanvasFn(theCanvas) {
   var canvasState = this;
 
   //draggingggggg! :D
-  theCanvas.addEventListener("mousedown", function(para) {
+  canvas.addEventListener("mousedown", function(para) {
     var userMouse = canvasState.getMouse(para);
     var mouseX = userMouse.x;
     var mouseY = userMouse.y;
@@ -56,6 +56,7 @@ function theCanvasFn(theCanvas) {
     var length = shapes.length;
     //this for loop will start at the objects number and move down
     for(var i = length - 1; i >= 0; i--) {
+      if(shapes[i].contains(mouseX, mouseY)) {
       var theSelection = shapes[i];
       //the shape moves more smoothly accross the screen when we keep track of
       //exactly where it was clicked
@@ -64,8 +65,47 @@ function theCanvasFn(theCanvas) {
       canvasState.userDragging = true;
       canvasState.selection = theSelection;
       canvasState.valid = false;
-      /////will finish this function I just want to create
-      //the draw and add shape functions quickly after I push to github repo
+      return;
+      }
     }
-  })
+    // if the users mouse coords and the shapes coords do not match up
+    //it means the user has failed to select anything
+    //if there was something selected, then we deselect it
+    if(canvasState.selection) {
+      canvasState.selection = null;
+      //clearing the old selection border
+      canvasState.valid = false;
+    }
+  }, true);
+  canvas.addEventListener('mousemove', function(para) {
+    if(canvasState.userDragging) {
+      var userMouse = canvasState.getMouse(para);
+      //adding code so that the user is not dragging the object from 0,0 or the top left corner
+      //and instead is going to save the mouse coords and move the object by that
+      canvasState.selection.x = userMouse.x - canvasState.draggingX;
+      canvasState.selection.y = userMouse.y - canvasState.draggingY;
+      //because something is moving, we need to redraw it
+      canvasState.valid = false;
+    }
+  }, true);
+  canvas.addEventListener('mosueup', function(para) {
+    //the user is no longer moving a shape so set bool to false;
+    canvasState.userDragging = false;
+  }, true;)
+  //in order to make new shapes the user can double click
+  canvas.addEventListener('dblclick', function(para) {
+    var userMouse = canvasState.getMouse(para);
+    canvasState.addShape(new Shape
+    (userMouse.x - 8, userMouse.y - 8, 18, 18, 'rgba(0, 255,0, 1)'));
+  }, true);
+  //some more options
+  this.selectionColor= 
+}
+TheCanvas.prototype.addShape = function(shape) {
+  this.shapes.push(shape);
+  this.valid = false;
+}
+
+TheCanvas.prototype.clearShape = function() {
+  this.proto.clearRect(0, 0, this.width, this.height);
 }
