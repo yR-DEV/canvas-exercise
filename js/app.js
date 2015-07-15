@@ -99,13 +99,56 @@ function TheCanvas(canvas) {
     (userMouse.x - 8, userMouse.y - 8, 18, 18, 'rgba(0, 255,0, 1)'));
   }, true);
   //some more options
-  this.selectionColor= 
+  this.selectionColor= '#CC0001';
+  this.selectionWidth = 1.8;
+  this.interval = 28;
+  setInterval(function() {canvasState.draw(); }, canvasState.interval);
 }
+
+//add shape prototype, adding the new shape to the array
 TheCanvas.prototype.addShape = function(shape) {
   this.shapes.push(shape);
   this.valid = false;
-}
+};
 
 TheCanvas.prototype.clearShape = function() {
   this.proto.clearRect(0, 0, this.width, this.height);
+};
+
+TheCanvas.prototype.draw = function() {
+  if(!this.valid) {
+    var proto = this.proto;
+    var shapes = this.shapes;
+    //I want to callon the clear function every time I redraw
+    this.clear();
+
+    //this is where I make a background image if I want to
+    //but because this is an exercise I would rather not
+
+    //drawing ALL DA SHAPEZ
+    var length = shapes.length;
+    for(var i = 0; i < length; i++) {
+      var theShape = shapes[i];
+      if (theShape.x > this.width || theShape.y > this.height ||
+          theShape.x + theShape.w < 0 || theShape.y + theShape.h < 0) continue;
+      shapes[i].draw(proto);
+    }
+
+    if(this.selection != null) {
+      proto.strokeStyle = this.selectionColor;
+      proto.lineWidth = this.selectionWidth;
+      var theSelection = this.selection;
+      proto.strokeRect(theSelection.x, theSelection.y, theSelection.width, theSelection.height);
+    }
+    this.valid = true;
+  }
+}
+
+//the total offset is calculated here
+if(element.offsetParent !== undefined) {
+  //do while loop
+  do {
+    offsetX += element.offsetLeft;
+    offsetY += element.offsetTop;
+  } while ((element = element.offsetParent));
 }
